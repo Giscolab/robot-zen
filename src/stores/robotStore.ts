@@ -67,21 +67,74 @@ interface RobotStore {
   processCommand: (cmd: string) => void;
 }
 
-const MONIQUE_RESPONSES = [
-  "Bien sûr mon chou ! Je m'en occupe tout de suite. 💅",
-  "Oh là là, quelle question ! Laisse-moi réfléchir... 🤔",
-  "Tu sais quoi ? T'as raison. Monique approuve ! ✨",
-  "Pas de souci, je gère ça comme une pro ! 💪",
-  "Hmm, intéressant... Monique analyse la situation... 🧐",
-];
+const MONIQUE_RESPONSES: Record<string, string[]> = {
+  neutral: [
+    "Bien sûr mon chou ! Je m'en occupe tout de suite. 💅",
+    "Oh là là, quelle question ! Laisse-moi réfléchir... 🤔",
+    "Tu sais quoi ? T'as raison. Monique approuve ! ✨",
+    "Pas de souci, je gère ça comme une pro ! 💪",
+  ],
+  happy: [
+    "Oh c'est MERVEILLEUX ! Je suis aux anges ! 🌟💃",
+    "Yaaay ! Monique est ravie de t'aider ! ✨😄",
+    "Tout est parfait aujourd'hui ! On y va ! 🎉",
+  ],
+  sad: [
+    "Snif... C'est pas ma journée mais je vais essayer... 😢",
+    "Oh... Monique a un petit coup de blues... 💙",
+    "C'est un peu triste mais bon... on continue... 🥺",
+  ],
+  angry: [
+    "BON ! Ça suffit ! Monique va régler ça ! 😤💢",
+    "Franchement ! C'est agaçant ! Mais soit... 😠",
+    "Grrrr ! On va faire ça VITE et BIEN ! 💥",
+  ],
+  surprised: [
+    "OH ! Je m'attendais PAS à ça du tout ! 😲✨",
+    "Waouh ! C'est... inattendu ! Monique est scotchée ! 🤯",
+  ],
+  curious: [
+    "Ooooh intéressant... Monique veut en savoir plus ! 🧐✨",
+    "Hmm hmm ! Raconte-moi tout ! 🔍💅",
+  ],
+  tired: [
+    "Bâillement... Oui oui, Monique écoute... 😴💤",
+    "Zzz... Hein ? Ah oui, pardon... je suis crevée... 🥱",
+  ],
+};
 
-const ROBERT_RESPONSES = [
-  "Affirmatif. Exécution en cours. 🔧",
-  "Paramètres reçus. Calcul en progression... ⚙️",
-  "Analyse complète. Résultat optimal atteint. 📊",
-  "Commande validée. Processus initialisé. 🤖",
-  "Roger. Traitement des données en cours... 💾",
-];
+const ROBERT_RESPONSES: Record<string, string[]> = {
+  neutral: [
+    "Affirmatif. Exécution en cours. 🔧",
+    "Paramètres reçus. Calcul en progression... ⚙️",
+    "Analyse complète. Résultat optimal atteint. 📊",
+    "Commande validée. Processus initialisé. 🤖",
+  ],
+  happy: [
+    "Excellent. Performance optimale confirmée. Satisfaction : 100%. ✅",
+    "Opération réussie. Indicateurs au vert. 📈",
+  ],
+  sad: [
+    "Erreur émotionnelle détectée. Fonctionnement dégradé... 📉",
+    "Moral bas. Efficacité réduite à 47%... 🔵",
+  ],
+  angry: [
+    "ALERTE. Seuil de tolérance dépassé. Mode offensif activé. 🔴",
+    "Paramètres hors limites. Réponse forcée initialisée. ⚡",
+  ],
+  surprised: [
+    "Donnée inattendue. Recalibration nécessaire... 📡",
+    "Anomalie détectée. Ce résultat n'était pas prévu. ❓",
+  ],
+  curious: [
+    "Requête intéressante. Analyse approfondie initialisée... 🔬",
+    "Données fascinantes. Investigation en cours. 🧪",
+  ],
+  tired: [
+    "Batterie faible. Mode économie activé... 🪫",
+    "Cycles CPU réduits. Réponse... en... cours... 💤",
+  ],
+};
 
 export const useRobotStore = create<RobotStore>((set, get) => ({
   connected: true,
@@ -127,9 +180,10 @@ export const useRobotStore = create<RobotStore>((set, get) => ({
     }));
 
     if (msg.sender === 'user') {
-      const { personality } = get();
-      const responses = personality === 'monique' ? MONIQUE_RESPONSES : ROBERT_RESPONSES;
-      const response = responses[Math.floor(Math.random() * responses.length)];
+      const { personality, emotion } = get();
+      const responseMap = personality === 'monique' ? MONIQUE_RESPONSES : ROBERT_RESPONSES;
+      const pool = responseMap[emotion] || responseMap['neutral'];
+      const response = pool[Math.floor(Math.random() * pool.length)];
 
       setTimeout(() => {
         const rid = crypto.randomUUID();
@@ -175,6 +229,16 @@ export const useRobotStore = create<RobotStore>((set, get) => ({
       const p = c.split(' ')[1] as Personality;
       store.setPersonality(p);
       store.addTerminalLine({ type: 'output', text: `Personality switched to: ${p}` });
+    } else if (c.startsWith('servo ')) {
+      const parts = c.split(' ');
+      const name = parts[1] as keyof ServoState;
+      const value = parseInt(parts[2]);
+      if (name in store.servos && !isNaN(value)) {
+        store.setServo(name, value);
+        store.addTerminalLine({ type: 'output', text: `Servo ${name} set to ${value}°` });
+      } else {
+        store.addTerminalLine({ type: 'error', text: `Invalid servo command. Usage: servo <head|leftArm|rightArm|torso> <0-180>` });
+      }
     } else if (c === 'clear') {
       set({ terminalLines: [] });
     } else {
