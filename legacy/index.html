@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robot AI Local</title>
+
+  <!-- ✅ CSS (depuis public/css) -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/terminal.css" />
+  <link rel="stylesheet" href="/css/threejs.css" />
+
+  <!-- ✅ Script principal (Vite module) -->
+  <script type="module" src="/src/client/main.js"></script>
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- ===================== -->
+    <!-- ✅ LOG SYSTEM -->
+    <!-- ===================== -->
+    <pre id="systemLog"
+      class="log-output"
+      style="background:#111; color:#0f0; height:150px; overflow-y:auto; font-family:monospace; padding:8px; border:1px solid #333;">
+    </pre>
+
+    <!-- ===================== -->
+    <!-- ✅ STATUS + ENERGY -->
+    <!-- ===================== -->
+    <div style="display: flex; gap: 20px; margin: 20px 0; align-items: center;">
+      <div>
+        <span class="websocket-status" id="wsStatus">● OFFLINE</span>
+        <button id="wsToggleBtn">WebSocket: OFF</button>
+      </div>
+
+      <div class="energy-bar" id="energyConsumption" style="width:200px; height:20px;">
+        <div id="energyLevel"
+          style="width:50%; height:100%; background:#0f0; border-radius:10px;">
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== -->
+    <!-- ✅ 3D + TERMINAL -->
+    <!-- ===================== -->
+    <div class="robot-container">
+
+      <!-- 3D VIEW -->
+      <div id="three-container"
+        style="width:100%; height:400px; background:#000; border:1px solid #333; border-radius:8px;">
+      </div>
+
+      <!-- TERMINAL -->
+      <div class="control-panel">
+        <h3>Mode Développement (SSH)</h3>
+        <div id="terminal" class="terminal-window"></div>
+        <button id="sendCommandBtn">Envoyer</button>
+      </div>
+
+    </div>
+
+    <!-- ===================== -->
+    <!-- ✅ INFRASTRUCTURE -->
+    <!-- ===================== -->
+    <section class="infrastructure-section servo-control">
+      <h2><span class="status-led"></span> Infrastructure</h2>
+
+      <div class="hardware-schema">
+        <div class="component pulsing">
+          <h3>Stack Technique</h3>
+          <ul class="tech-grid">
+            <li><span class="terminal-cmd">Node.js / Express</span></li>
+            <li><span class="terminal-cmd">TimescaleDB</span></li>
+            <li><span class="terminal-cmd">Redis</span></li>
+            <li><span class="terminal-cmd">Docker / K8s</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== -->
+    <!-- ✅ CI/CD -->
+    <!-- ===================== -->
+    <section class="pipeline-section control-panel">
+      <h2><span class="websocket-status"></span> CI/CD</h2>
+
+      <pre class="terminal-window">
+stages:
+  - test
+  - build
+  - deploy
+
+module-tests:
+  image: node:18
+  script:
+    - npm install
+    - npm run test
+      </pre>
+    </section>
+
+    <!-- ===================== -->
+    <!-- ✅ MONITORING -->
+    <!-- ===================== -->
+    <section class="monitoring-grid">
+
+      <div class="grafana-card component">
+        <h3><span class="status-led" style="--led-color:#0f0"></span> Monitoring</h3>
+
+        <ul class="metrics-list">
+          <li>Prometheus
+            <div class="energy-bar">
+              <div style="width:85%"></div>
+            </div>
+          </li>
+
+          <li>Loki
+            <div class="energy-bar">
+              <div style="width:78%"></div>
+            </div>
+          </li>
+
+          <li>Tempo
+            <div class="energy-bar">
+              <div style="width:92%"></div>
+            </div>
+          </li>
+        </ul>
+
+      </div>
+    </section>
+
+    <!-- ===================== -->
+    <!-- ✅ SECURITY -->
+    <!-- ===================== -->
+    <section class="security-panel servo-control">
+      <h2><span class="pulsing"></span> Sécurité</h2>
+
+      <div class="security-grid">
+
+        <div class="security-chip">
+          <span class="terminal-cmd error">Trivy</span>
+          <div class="log-output">Scan quotidien</div>
+        </div>
+
+        <div class="security-chip">
+          <span class="terminal-cmd">CSP</span>
+          <div class="log-output">Politique active</div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</body>
+
+</html>
