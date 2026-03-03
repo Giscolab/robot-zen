@@ -51,7 +51,7 @@ const ControlPanel = () => {
               }}
             />
           </div>
-          <span className="text-xs text-muted-foreground font-mono mt-1 block">{energy}%</span>
+          <span className="text-xs text-muted-foreground font-mono mt-1 block">{energy.toFixed(1)}%</span>
         </section>
 
         {/* Personality */}
