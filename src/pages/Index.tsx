@@ -6,11 +6,13 @@ import ControlPanel from '@/components/ControlPanel';
 import Terminal from '@/components/Terminal';
 import Face from '@/components/Face';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useRobotWebSocket } from '@/hooks/use-websocket';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { MessageSquare, SlidersHorizontal, TerminalSquare } from 'lucide-react';
 
 const Index = () => {
   const isMobile = useIsMobile();
+  useRobotWebSocket();
 
   if (isMobile) {
     return (

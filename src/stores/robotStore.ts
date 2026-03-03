@@ -15,6 +15,16 @@ export interface SensorData {
   distance: number;
   light: number;
   sound: number;
+  voltage?: number;
+  current?: number;
+  motorLoad?: number;
+}
+
+export interface EnergyDetails {
+  cpu: number;
+  motors: number;
+  leds: number;
+  total: number;
 }
 
 export interface ChatMessage {
@@ -55,7 +65,10 @@ interface RobotStore {
 
   // Sensors
   sensors: SensorData;
-  updateSensors: () => void;
+  updateSensors: (data?: Partial<SensorData>) => void;
+
+  // Energy
+  energyDetails: EnergyDetails;
 
   // Chat
   messages: ChatMessage[];
@@ -153,16 +166,34 @@ export const useRobotStore = create<RobotStore>((set, get) => ({
   setServo: (key, value) =>
     set((s) => ({ servos: { ...s.servos, [key]: Math.max(0, Math.min(180, value)) } })),
 
-  sensors: { temperature: 22.5, distance: 150, light: 680, sound: 45 },
-  updateSensors: () =>
-    set({
-      sensors: {
-        temperature: 20 + Math.random() * 8,
-        distance: 50 + Math.random() * 300,
-        light: 200 + Math.random() * 800,
-        sound: 20 + Math.random() * 60,
-      },
+  sensors: { temperature: 22.5, distance: 150, light: 680, sound: 45, voltage: 12, current: 0.5, motorLoad: 15 },
+  updateSensors: (data) =>
+    set((state) => {
+      const newSensors = {
+        ...state.sensors,
+        temperature: data?.temperature ?? (20 + Math.random() * 8),
+        distance: data?.distance ?? (50 + Math.random() * 300),
+        light: data?.light ?? (200 + Math.random() * 800),
+        sound: data?.sound ?? (20 + Math.random() * 60),
+        voltage: data?.voltage ?? state.sensors.voltage,
+        current: data?.current ?? state.sensors.current,
+        motorLoad: data?.motorLoad ?? state.sensors.motorLoad,
+      };
+
+      // Ported logic from legacy/src/robot/energy.js
+      const cpu = newSensors.temperature / 10;
+      const motors = Math.abs(90 - state.servos.head) / 10; // Using head servo as proxy
+      const leds = state.emotion === 'angry' ? 1 : state.emotion === 'happy' ? 0.3 : 0.1;
+      const total = cpu + motors + leds;
+
+      return {
+        sensors: newSensors,
+        energy: Math.max(0, Math.min(100, 100 - total * 5)), // Simple mapping to %
+        energyDetails: { cpu, motors, leds, total }
+      };
     }),
+
+  energyDetails: { cpu: 2.2, motors: 0, leds: 0.1, total: 2.3 },
 
   messages: [
     {

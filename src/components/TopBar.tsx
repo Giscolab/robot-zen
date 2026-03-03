@@ -30,7 +30,7 @@ const TopBar = () => {
 
         <div className="flex items-center gap-1.5">
           <Battery className="h-3.5 w-3.5 text-primary" />
-          <span className="text-foreground font-mono">{energy}%</span>
+          <span className="text-foreground font-mono">{energy.toFixed(1)}%</span>
         </div>
 
         <div className="h-4 w-px bg-border" />
