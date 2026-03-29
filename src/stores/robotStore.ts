@@ -260,6 +260,11 @@ export const useRobotStore = create<RobotStore>((set, get) => ({
       store.addTerminalLine({ type: 'output', text: '  diagnostic      — Diagnostic complet du système' });
       store.addTerminalLine({ type: 'output', text: '  dance           — Séquence de danse 💃' });
       store.addTerminalLine({ type: 'output', text: '  wave            — Faire un signe de la main 👋' });
+      store.addTerminalLine({ type: 'output', text: '  demo            — Démo complète des capacités 🎬' });
+      store.addTerminalLine({ type: 'output', text: '  patrol          — Mode patrouille (scan environnement) 🔦' });
+      store.addTerminalLine({ type: 'output', text: '  stretch         — Étirements matinaux 🧘' });
+      store.addTerminalLine({ type: 'output', text: '  emotions        — Défilé de toutes les émotions 🎭' });
+      store.addTerminalLine({ type: 'output', text: '  combat          — Stance de combat 🥊' });
       store.addTerminalLine({ type: 'output', text: '  reset           — Réinitialiser servos & émotion' });
       store.addTerminalLine({ type: 'output', text: '  history         — Historique des messages chat' });
       store.addTerminalLine({ type: 'output', text: '  clear           — Effacer le terminal' });
@@ -408,6 +413,111 @@ export const useRobotStore = create<RobotStore>((set, get) => ({
         const tag = m.sender === 'user' ? '👤' : '🤖';
         store.addTerminalLine({ type: 'output', text: `  ${tag} ${m.text.substring(0, 60)}${m.text.length > 60 ? '...' : ''}` });
       });
+    } else if (c === 'demo') {
+      store.addTerminalLine({ type: 'system', text: '🎬 ═══ DÉMONSTRATION COMPLÈTE ═══' });
+      store.addTerminalLine({ type: 'system', text: '   Durée estimée : ~15 secondes' });
+
+      const steps: Array<{ delay: number; action: () => void }> = [
+        { delay: 500, action: () => {
+          store.addTerminalLine({ type: 'system', text: '▶ Phase 1/6 — Salutation 👋' });
+          store.setServo('rightArm', 170); store.setEmotion('happy');
+        }},
+        { delay: 1200, action: () => { store.setServo('rightArm', 140); }},
+        { delay: 1600, action: () => { store.setServo('rightArm', 170); }},
+        { delay: 2000, action: () => { store.setServo('rightArm', 45); }},
+        { delay: 2800, action: () => {
+          store.addTerminalLine({ type: 'system', text: '▶ Phase 2/6 — Scan environnement 🔍' });
+          store.setEmotion('curious'); store.setServo('head', 30);
+        }},
+        { delay: 3600, action: () => { store.setServo('head', 150); }},
+        { delay: 4400, action: () => { store.setServo('head', 90); }},
+        { delay: 5200, action: () => {
+          store.addTerminalLine({ type: 'system', text: '▶ Phase 3/6 — Danse 💃' });
+          store.setEmotion('happy'); store.setServo('leftArm', 160); store.setServo('rightArm', 20); store.setServo('torso', 30);
+        }},
+        { delay: 6000, action: () => { store.setServo('leftArm', 20); store.setServo('rightArm', 160); store.setServo('torso', -30); }},
+        { delay: 6800, action: () => { store.setServo('leftArm', 160); store.setServo('rightArm', 160); store.setServo('torso', 0); }},
+        { delay: 7600, action: () => {
+          store.addTerminalLine({ type: 'system', text: '▶ Phase 4/6 — Cycle émotions 🎭' });
+          store.setEmotion('surprised');
+        }},
+        { delay: 8400, action: () => { store.setEmotion('angry'); store.setServo('leftArm', 170); store.setServo('rightArm', 170); }},
+        { delay: 9200, action: () => { store.setEmotion('sad'); store.setServo('leftArm', 10); store.setServo('rightArm', 10); store.setServo('head', 60); }},
+        { delay: 10000, action: () => { store.setEmotion('curious'); store.setServo('head', 120); }},
+        { delay: 10800, action: () => {
+          store.addTerminalLine({ type: 'system', text: '▶ Phase 5/6 — Stance combat 🥊' });
+          store.setEmotion('angry'); store.setServo('leftArm', 100); store.setServo('rightArm', 130); store.setServo('torso', 15); store.setServo('head', 80);
+        }},
+        { delay: 11600, action: () => { store.setServo('rightArm', 170); }},
+        { delay: 12000, action: () => { store.setServo('rightArm', 130); store.setServo('leftArm', 170); }},
+        { delay: 12400, action: () => { store.setServo('leftArm', 100); }},
+        { delay: 13200, action: () => {
+          store.addTerminalLine({ type: 'system', text: '▶ Phase 6/6 — Retour au repos 😌' });
+          store.setEmotion('neutral'); store.setServo('head', 90); store.setServo('leftArm', 45); store.setServo('rightArm', 45); store.setServo('torso', 0);
+        }},
+        { delay: 14000, action: () => {
+          store.addTerminalLine({ type: 'system', text: '🎬 ═══ DÉMONSTRATION TERMINÉE ═══' });
+          store.addMessage({ sender: 'robot', text: 'Démonstration terminée ! Impressionnant, non ? 🤖✨', personality: store.personality });
+        }},
+      ];
+      steps.forEach(({ delay, action }) => setTimeout(action, delay));
+
+    } else if (c === 'patrol') {
+      store.addTerminalLine({ type: 'system', text: '🔦 Mode patrouille activé...' });
+      store.setEmotion('curious');
+      const scanSteps: Array<{ delay: number; action: () => void }> = [
+        { delay: 400, action: () => { store.setServo('head', 30); store.addTerminalLine({ type: 'output', text: '  📡 Scan gauche... rien détecté' }); }},
+        { delay: 1200, action: () => { store.setServo('head', 60); store.addTerminalLine({ type: 'output', text: '  📡 Scan centre-gauche...' }); }},
+        { delay: 2000, action: () => { store.setServo('head', 90); store.addTerminalLine({ type: 'output', text: '  📡 Scan centre... mouvement détecté !' }); store.setEmotion('surprised'); }},
+        { delay: 2800, action: () => { store.setServo('head', 120); store.addTerminalLine({ type: 'output', text: '  📡 Scan centre-droit...' }); store.setEmotion('curious'); }},
+        { delay: 3600, action: () => { store.setServo('head', 150); store.addTerminalLine({ type: 'output', text: '  📡 Scan droite... zone sécurisée' }); }},
+        { delay: 4400, action: () => { store.setServo('head', 90); store.setEmotion('neutral'); store.updateSensors(); store.addTerminalLine({ type: 'system', text: '🔦 Patrouille terminée. Capteurs mis à jour.' }); }},
+      ];
+      scanSteps.forEach(({ delay, action }) => setTimeout(action, delay));
+
+    } else if (c === 'stretch') {
+      store.addTerminalLine({ type: 'system', text: '🧘 Étirements matinaux...' });
+      store.setEmotion('tired');
+      const stretchSteps: Array<{ delay: number; action: () => void }> = [
+        { delay: 500, action: () => { store.addTerminalLine({ type: 'output', text: '  Étirement bras gauche...' }); store.setServo('leftArm', 170); }},
+        { delay: 1300, action: () => { store.setServo('leftArm', 45); store.addTerminalLine({ type: 'output', text: '  Étirement bras droit...' }); store.setServo('rightArm', 170); }},
+        { delay: 2100, action: () => { store.setServo('rightArm', 45); store.addTerminalLine({ type: 'output', text: '  Rotation tête...' }); store.setServo('head', 30); }},
+        { delay: 2900, action: () => { store.setServo('head', 150); }},
+        { delay: 3700, action: () => { store.setServo('head', 90); store.addTerminalLine({ type: 'output', text: '  Les deux bras...' }); store.setServo('leftArm', 170); store.setServo('rightArm', 170); }},
+        { delay: 4500, action: () => { store.setServo('leftArm', 45); store.setServo('rightArm', 45); store.setEmotion('happy'); store.addTerminalLine({ type: 'system', text: '🧘 Étirements terminés ! Prêt pour la journée ✅' }); }},
+      ];
+      stretchSteps.forEach(({ delay, action }) => setTimeout(action, delay));
+
+    } else if (c === 'emotions') {
+      store.addTerminalLine({ type: 'system', text: '🎭 Défilé de toutes les émotions...' });
+      const allEmotions: Emotion[] = ['neutral', 'happy', 'sad', 'angry', 'surprised', 'curious', 'tired'];
+      const labels: Record<Emotion, string> = { neutral: '😐 Neutre', happy: '😄 Heureux', sad: '😢 Triste', angry: '😠 En colère', surprised: '😲 Surpris', curious: '🧐 Curieux', tired: '😴 Fatigué' };
+      allEmotions.forEach((em, i) => {
+        setTimeout(() => {
+          store.setEmotion(em);
+          store.addTerminalLine({ type: 'output', text: `  → ${labels[em]}` });
+          if (i === allEmotions.length - 1) {
+            setTimeout(() => { store.setEmotion('neutral'); store.addTerminalLine({ type: 'system', text: '🎭 Défilé terminé. Retour neutre.' }); }, 1200);
+          }
+        }, (i + 1) * 1200);
+      });
+
+    } else if (c === 'combat') {
+      store.addTerminalLine({ type: 'system', text: '🥊 Mode combat activé !' });
+      store.setEmotion('angry');
+      const combatSteps: Array<{ delay: number; action: () => void }> = [
+        { delay: 400, action: () => { store.addTerminalLine({ type: 'output', text: '  Stance défensive...' }); store.setServo('leftArm', 100); store.setServo('rightArm', 130); store.setServo('torso', 10); }},
+        { delay: 1200, action: () => { store.addTerminalLine({ type: 'output', text: '  💥 Coup droit !' }); store.setServo('rightArm', 175); }},
+        { delay: 1700, action: () => { store.setServo('rightArm', 130); }},
+        { delay: 2200, action: () => { store.addTerminalLine({ type: 'output', text: '  💥 Crochet gauche !' }); store.setServo('leftArm', 175); store.setServo('torso', -20); }},
+        { delay: 2700, action: () => { store.setServo('leftArm', 100); store.setServo('torso', 10); }},
+        { delay: 3200, action: () => { store.addTerminalLine({ type: 'output', text: '  💥 Combo !' }); store.setServo('rightArm', 175); store.setServo('leftArm', 175); }},
+        { delay: 3700, action: () => { store.setServo('rightArm', 130); store.setServo('leftArm', 100); }},
+        { delay: 4200, action: () => { store.addTerminalLine({ type: 'output', text: '  🏆 Victoire !' }); store.setServo('leftArm', 170); store.setServo('rightArm', 170); store.setEmotion('happy'); }},
+        { delay: 5000, action: () => { store.setServo('leftArm', 45); store.setServo('rightArm', 45); store.setServo('torso', 0); store.setEmotion('neutral'); store.addTerminalLine({ type: 'system', text: '🥊 Mode combat désactivé.' }); }},
+      ];
+      combatSteps.forEach(({ delay, action }) => setTimeout(action, delay));
+
     } else if (c === 'clear') {
       set({ terminalLines: [] });
     } else {
