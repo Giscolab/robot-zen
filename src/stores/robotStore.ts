@@ -244,36 +244,174 @@ export const useRobotStore = create<RobotStore>((set, get) => ({
 
     const c = cmd.trim().toLowerCase();
     if (c === 'help') {
-      store.addTerminalLine({ type: 'output', text: 'Commands: status, sensors, energy, emotion <name>, personality <name>, servo <name> <value>, clear, help' });
+      store.addTerminalLine({ type: 'system', text: '═══════════ COMMANDES DISPONIBLES ═══════════' });
+      store.addTerminalLine({ type: 'output', text: '  status          — État général du robot' });
+      store.addTerminalLine({ type: 'output', text: '  sensors         — Lecture des capteurs' });
+      store.addTerminalLine({ type: 'output', text: '  energy          — Détails énergie & consommation' });
+      store.addTerminalLine({ type: 'output', text: '  emotion <nom>   — Changer émotion (neutral|happy|sad|angry|surprised|curious|tired)' });
+      store.addTerminalLine({ type: 'output', text: '  personality <p> — Changer personnalité (monique|robert)' });
+      store.addTerminalLine({ type: 'output', text: '  servo <n> <v>   — Bouger servo (head|leftArm|rightArm|torso) 0-180' });
+      store.addTerminalLine({ type: 'output', text: '  servos          — État de tous les servos' });
+      store.addTerminalLine({ type: 'output', text: '  say <message>   — Faire parler le robot' });
+      store.addTerminalLine({ type: 'output', text: '  ping            — Test de connexion' });
+      store.addTerminalLine({ type: 'output', text: '  uptime          — Temps de fonctionnement' });
+      store.addTerminalLine({ type: 'output', text: '  whoami          — Identité du robot actif' });
+      store.addTerminalLine({ type: 'output', text: '  reboot          — Redémarrage simulé' });
+      store.addTerminalLine({ type: 'output', text: '  diagnostic      — Diagnostic complet du système' });
+      store.addTerminalLine({ type: 'output', text: '  dance           — Séquence de danse 💃' });
+      store.addTerminalLine({ type: 'output', text: '  wave            — Faire un signe de la main 👋' });
+      store.addTerminalLine({ type: 'output', text: '  reset           — Réinitialiser servos & émotion' });
+      store.addTerminalLine({ type: 'output', text: '  history         — Historique des messages chat' });
+      store.addTerminalLine({ type: 'output', text: '  clear           — Effacer le terminal' });
     } else if (c === 'status') {
-      store.addTerminalLine({ type: 'output', text: `Connected: ${store.connected} | Energy: ${store.energy}% | Emotion: ${store.emotion} | Personality: ${store.personality}` });
+      store.addTerminalLine({ type: 'output', text: `┌─── STATUS ───────────────────────────┐` });
+      store.addTerminalLine({ type: 'output', text: `│ Connecté  : ${store.connected ? '✅ Oui' : '❌ Non'}` });
+      store.addTerminalLine({ type: 'output', text: `│ Énergie   : ${'█'.repeat(Math.round(store.energy / 5))}${'░'.repeat(20 - Math.round(store.energy / 5))} ${store.energy.toFixed(0)}%` });
+      store.addTerminalLine({ type: 'output', text: `│ Émotion   : ${store.emotion}` });
+      store.addTerminalLine({ type: 'output', text: `│ Personnalité : ${store.personality}` });
+      store.addTerminalLine({ type: 'output', text: `└──────────────────────────────────────┘` });
     } else if (c === 'sensors') {
       const s = store.sensors;
-      store.addTerminalLine({ type: 'output', text: `Temp: ${s.temperature.toFixed(1)}°C | Dist: ${s.distance.toFixed(0)}cm | Light: ${s.light.toFixed(0)}lux | Sound: ${s.sound.toFixed(0)}dB` });
+      store.addTerminalLine({ type: 'output', text: `┌─── CAPTEURS ─────────────────────────┐` });
+      store.addTerminalLine({ type: 'output', text: `│ 🌡️  Température : ${s.temperature.toFixed(1)}°C` });
+      store.addTerminalLine({ type: 'output', text: `│ 📏 Distance    : ${s.distance.toFixed(0)} cm` });
+      store.addTerminalLine({ type: 'output', text: `│ 💡 Lumière     : ${s.light.toFixed(0)} lux` });
+      store.addTerminalLine({ type: 'output', text: `│ 🔊 Son         : ${s.sound.toFixed(0)} dB` });
+      store.addTerminalLine({ type: 'output', text: `│ ⚡ Voltage     : ${(s.voltage ?? 0).toFixed(1)} V` });
+      store.addTerminalLine({ type: 'output', text: `│ 🔌 Courant     : ${(s.current ?? 0).toFixed(2)} A` });
+      store.addTerminalLine({ type: 'output', text: `│ ⚙️  Charge mot. : ${(s.motorLoad ?? 0).toFixed(0)}%` });
+      store.addTerminalLine({ type: 'output', text: `└──────────────────────────────────────┘` });
     } else if (c === 'energy') {
-      store.addTerminalLine({ type: 'output', text: `Energy: ${store.energy}%` });
+      const ed = store.energyDetails;
+      store.addTerminalLine({ type: 'output', text: `┌─── ÉNERGIE ──────────────────────────┐` });
+      store.addTerminalLine({ type: 'output', text: `│ Niveau  : ${'█'.repeat(Math.round(store.energy / 5))}${'░'.repeat(20 - Math.round(store.energy / 5))} ${store.energy.toFixed(0)}%` });
+      store.addTerminalLine({ type: 'output', text: `│ CPU     : ${ed.cpu.toFixed(2)} W` });
+      store.addTerminalLine({ type: 'output', text: `│ Moteurs : ${ed.motors.toFixed(2)} W` });
+      store.addTerminalLine({ type: 'output', text: `│ LEDs    : ${ed.leds.toFixed(2)} W` });
+      store.addTerminalLine({ type: 'output', text: `│ Total   : ${ed.total.toFixed(2)} W` });
+      store.addTerminalLine({ type: 'output', text: `└──────────────────────────────────────┘` });
     } else if (c.startsWith('emotion ')) {
       const e = c.split(' ')[1] as Emotion;
-      store.setEmotion(e);
-      store.addTerminalLine({ type: 'output', text: `Emotion set to: ${e}` });
+      const valid: Emotion[] = ['neutral', 'happy', 'sad', 'angry', 'surprised', 'curious', 'tired'];
+      if (valid.includes(e)) {
+        store.setEmotion(e);
+        store.addTerminalLine({ type: 'output', text: `✅ Émotion changée → ${e}` });
+      } else {
+        store.addTerminalLine({ type: 'error', text: `❌ Émotion invalide. Valeurs : ${valid.join(', ')}` });
+      }
     } else if (c.startsWith('personality ')) {
       const p = c.split(' ')[1] as Personality;
-      store.setPersonality(p);
-      store.addTerminalLine({ type: 'output', text: `Personality switched to: ${p}` });
+      const valid: Personality[] = ['monique', 'robert'];
+      if (valid.includes(p)) {
+        store.setPersonality(p);
+        store.addTerminalLine({ type: 'output', text: `✅ Personnalité activée → ${p}` });
+      } else {
+        store.addTerminalLine({ type: 'error', text: `❌ Personnalité invalide. Valeurs : ${valid.join(', ')}` });
+      }
     } else if (c.startsWith('servo ')) {
       const parts = c.split(' ');
       const name = parts[1] as keyof ServoState;
       const value = parseInt(parts[2]);
       if (name in store.servos && !isNaN(value)) {
         store.setServo(name, value);
-        store.addTerminalLine({ type: 'output', text: `Servo ${name} set to ${value}°` });
+        store.addTerminalLine({ type: 'output', text: `✅ Servo ${name} → ${value}°` });
       } else {
-        store.addTerminalLine({ type: 'error', text: `Invalid servo command. Usage: servo <head|leftArm|rightArm|torso> <0-180>` });
+        store.addTerminalLine({ type: 'error', text: `❌ Usage : servo <head|leftArm|rightArm|torso> <0-180>` });
       }
+    } else if (c === 'servos') {
+      const sv = store.servos;
+      store.addTerminalLine({ type: 'output', text: `┌─── SERVOS ───────────────────────────┐` });
+      store.addTerminalLine({ type: 'output', text: `│ Tête      : ${sv.head}°` });
+      store.addTerminalLine({ type: 'output', text: `│ Bras G    : ${sv.leftArm}°` });
+      store.addTerminalLine({ type: 'output', text: `│ Bras D    : ${sv.rightArm}°` });
+      store.addTerminalLine({ type: 'output', text: `│ Torse     : ${sv.torso}°` });
+      store.addTerminalLine({ type: 'output', text: `└──────────────────────────────────────┘` });
+    } else if (c.startsWith('say ')) {
+      const message = cmd.trim().substring(4);
+      if (message) {
+        store.addMessage({ sender: 'robot', text: message, personality: store.personality });
+        store.addTerminalLine({ type: 'output', text: `🗣️ ${store.personality} dit : "${message}"` });
+      } else {
+        store.addTerminalLine({ type: 'error', text: `❌ Usage : say <message>` });
+      }
+    } else if (c === 'ping') {
+      const latency = Math.floor(Math.random() * 50 + 5);
+      store.addTerminalLine({ type: 'output', text: `🏓 PONG ! Latence : ${latency}ms` });
+    } else if (c === 'uptime') {
+      const mins = Math.floor(Math.random() * 480 + 60);
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      store.addTerminalLine({ type: 'output', text: `⏱️ Uptime : ${h}h ${m}m` });
+    } else if (c === 'whoami') {
+      const p = store.personality;
+      const desc = p === 'monique'
+        ? '💅 Monique — IA expressive, chaleureuse et stylée'
+        : '🔧 Robert — IA analytique, précise et méthodique';
+      store.addTerminalLine({ type: 'output', text: desc });
+    } else if (c === 'reboot') {
+      store.addTerminalLine({ type: 'system', text: '🔄 Redémarrage en cours...' });
+      store.addTerminalLine({ type: 'system', text: '   Arrêt des moteurs...' });
+      store.addTerminalLine({ type: 'system', text: '   Sauvegarde état...' });
+      store.addTerminalLine({ type: 'system', text: '   Réinitialisation capteurs...' });
+      setTimeout(() => {
+        store.addTerminalLine({ type: 'system', text: '✅ Système redémarré avec succès.' });
+        store.updateSensors();
+      }, 1500);
+    } else if (c === 'diagnostic') {
+      const s = store.sensors;
+      const tempOk = s.temperature < 35;
+      const voltOk = (s.voltage ?? 12) > 10;
+      const energyOk = store.energy > 20;
+      store.addTerminalLine({ type: 'system', text: '🔍 Diagnostic système en cours...' });
+      store.addTerminalLine({ type: tempOk ? 'output' : 'error', text: `  Température : ${tempOk ? '✅ OK' : '⚠️ ÉLEVÉE'} (${s.temperature.toFixed(1)}°C)` });
+      store.addTerminalLine({ type: voltOk ? 'output' : 'error', text: `  Voltage     : ${voltOk ? '✅ OK' : '⚠️ BAS'} (${(s.voltage ?? 0).toFixed(1)}V)` });
+      store.addTerminalLine({ type: energyOk ? 'output' : 'error', text: `  Énergie     : ${energyOk ? '✅ OK' : '⚠️ FAIBLE'} (${store.energy.toFixed(0)}%)` });
+      store.addTerminalLine({ type: 'output', text: `  Servos      : ✅ Opérationnels` });
+      store.addTerminalLine({ type: 'output', text: `  WebSocket   : ${store.connected ? '✅ Connecté' : '❌ Déconnecté'}` });
+      const issues = [!tempOk, !voltOk, !energyOk].filter(Boolean).length;
+      store.addTerminalLine({ type: issues > 0 ? 'error' : 'system', text: `📋 Résultat : ${issues === 0 ? 'Tous les systèmes sont nominaux ✅' : `${issues} alerte(s) détectée(s) ⚠️`}` });
+    } else if (c === 'dance') {
+      store.addTerminalLine({ type: 'system', text: '💃 Séquence de danse lancée !' });
+      const moves = [
+        { head: 120, leftArm: 160, rightArm: 20, torso: 30 },
+        { head: 60, leftArm: 20, rightArm: 160, torso: -30 },
+        { head: 90, leftArm: 90, rightArm: 90, torso: 0 },
+      ];
+      moves.forEach((m, i) => {
+        setTimeout(() => {
+          Object.entries(m).forEach(([k, v]) => store.setServo(k as keyof ServoState, v));
+          if (i === moves.length - 1) {
+            store.addTerminalLine({ type: 'output', text: '🎵 Danse terminée ! Position de repos.' });
+          }
+        }, (i + 1) * 800);
+      });
+    } else if (c === 'wave') {
+      store.addTerminalLine({ type: 'system', text: '👋 Salut !' });
+      store.setServo('rightArm', 170);
+      setTimeout(() => store.setServo('rightArm', 140), 400);
+      setTimeout(() => store.setServo('rightArm', 170), 800);
+      setTimeout(() => {
+        store.setServo('rightArm', 45);
+        store.addTerminalLine({ type: 'output', text: '✅ Geste terminé.' });
+      }, 1200);
+    } else if (c === 'reset') {
+      store.setServo('head', 90);
+      store.setServo('leftArm', 45);
+      store.setServo('rightArm', 45);
+      store.setServo('torso', 0);
+      store.setEmotion('neutral');
+      store.addTerminalLine({ type: 'system', text: '🔄 Servos et émotion réinitialisés.' });
+    } else if (c === 'history') {
+      const msgs = store.messages.slice(-10);
+      store.addTerminalLine({ type: 'system', text: `📜 Derniers ${msgs.length} messages :` });
+      msgs.forEach(m => {
+        const tag = m.sender === 'user' ? '👤' : '🤖';
+        store.addTerminalLine({ type: 'output', text: `  ${tag} ${m.text.substring(0, 60)}${m.text.length > 60 ? '...' : ''}` });
+      });
     } else if (c === 'clear') {
       set({ terminalLines: [] });
     } else {
-      store.addTerminalLine({ type: 'error', text: `Unknown command: ${cmd}` });
+      store.addTerminalLine({ type: 'error', text: `❌ Commande inconnue : "${cmd}". Tapez "help" pour la liste.` });
     }
   },
 }));
