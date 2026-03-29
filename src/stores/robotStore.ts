@@ -260,6 +260,11 @@ export const useRobotStore = create<RobotStore>((set, get) => ({
       store.addTerminalLine({ type: 'output', text: '  diagnostic      — Diagnostic complet du système' });
       store.addTerminalLine({ type: 'output', text: '  dance           — Séquence de danse 💃' });
       store.addTerminalLine({ type: 'output', text: '  wave            — Faire un signe de la main 👋' });
+      store.addTerminalLine({ type: 'output', text: '  demo            — Démo complète des capacités 🎬' });
+      store.addTerminalLine({ type: 'output', text: '  patrol          — Mode patrouille (scan environnement) 🔦' });
+      store.addTerminalLine({ type: 'output', text: '  stretch         — Étirements matinaux 🧘' });
+      store.addTerminalLine({ type: 'output', text: '  emotions        — Défilé de toutes les émotions 🎭' });
+      store.addTerminalLine({ type: 'output', text: '  combat          — Stance de combat 🥊' });
       store.addTerminalLine({ type: 'output', text: '  reset           — Réinitialiser servos & émotion' });
       store.addTerminalLine({ type: 'output', text: '  history         — Historique des messages chat' });
       store.addTerminalLine({ type: 'output', text: '  clear           — Effacer le terminal' });
